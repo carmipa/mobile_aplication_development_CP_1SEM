@@ -3,6 +3,15 @@ Este repositório centraliza os trabalhos desenvolvidos na disciplina **Mobile A
 
 ---
 
+## 📚 Disciplinas do Semestre
+
+**Mobile Application Development**  
+   - Desenvolvimento de aplicativos multiplataforma (Flutter, React Native)  
+   - Padrões de navegação e usabilidade mobile  
+   - Integração com APIs e serviços externos  
+   - Publicação e ciclo de vida de aplicativos em lojas oficiais  
+---
+
 ## 🎯 CP1 2025
 
 **Integrantes do CP:**  
