@@ -1,11 +1,14 @@
-// src/routes/index.js
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import DrawerRoutes from './drawer.routes';
+import { useColorScheme } from 'react-native'; // ✅ IMPORTANTE
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import DrawerRoutes from './drawer.routes'; // ou onde estão suas rotas
 
-export default function Routes() {
+export default function App() {
+    const scheme = useColorScheme(); // ✅ PEGA O TEMA DO SISTEMA (light/dark)
+
     return (
-        <NavigationContainer>
+        <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+            {/* ✅ APLICA O TEMA AUTOMÁTICO */}
             <DrawerRoutes />
         </NavigationContainer>
     );

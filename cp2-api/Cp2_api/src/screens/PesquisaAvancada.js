@@ -1,24 +1,18 @@
-// Api.js com suporte a tema claro/escuro e botão de troca de tema
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, FlatList, Alert, ActivityIndicator, Keyboard, ScrollView, useColorScheme } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, FlatList, Alert, ActivityIndicator, Keyboard, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
-import { useThemeContext } from '../context/ThemeContext'; // ✅ Novo: acesso ao tema
 
-export default function Api({ navigation }) {
+export default function PesquisaAvancada({ navigation }) {
     const [input, setInput] = useState('');
     const [dados, setDados] = useState([]);
     const [carregando, setCarregando] = useState(false);
     const [tribunalSelecionado, setTribunalSelecionado] = useState('');
     const [tipoJusticaSelecionado, setTipoJusticaSelecionado] = useState('');
+    const [classeSelecionada, setClasseSelecionada] = useState('');
+    const [grauSelecionado, setGrauSelecionado] = useState('');
     const [tribunaisFiltrados, setTribunaisFiltrados] = useState([]);
     const [ultimaPaginacao, setUltimaPaginacao] = useState(null);
-
-    const { currentTheme, cycleTheme } = useThemeContext(); // ✅ Novo: acesso ao tema e troca
-
-    const isDark = currentTheme === 'dark';
-    const backgroundColor = isDark ? '#000' : '#fff';
-    const textColor = isDark ? '#fff' : '#000';
 
     const tiposJustica = [
         { label: 'Tribunais Superiores', value: 'Superior' },
@@ -27,6 +21,18 @@ export default function Api({ navigation }) {
         { label: 'Justiça do Trabalho', value: 'Trabalho' },
         { label: 'Justiça Eleitoral', value: 'Eleitoral' },
         { label: 'Justiça Militar', value: 'Militar' }
+    ];
+
+    const classes = [
+        { label: 'Procedimento do Juizado Especial Cível', value: '436' },
+        { label: 'Ação Civil Pública', value: '149' },
+        { label: 'Ação de Indenização', value: '154' },
+        { label: 'Ação Ordinária', value: '100' },
+    ];
+
+    const graus = [
+        { label: '1º Grau', value: '1' },
+        { label: '2º Grau', value: '2' },
     ];
 
     const tribunais = [
@@ -141,12 +147,15 @@ export default function Api({ navigation }) {
         setDados([]);
         setTribunalSelecionado('');
         setTipoJusticaSelecionado('');
+        setClasseSelecionada('');
+        setGrauSelecionado('');
         setTribunaisFiltrados([]);
         setUltimaPaginacao(null);
     };
 
-    const buscarDados = async (paginando = false) => {
+    const buscarDados = async () => {
         Keyboard.dismiss();
+
         if (!input.trim()) {
             Alert.alert("Erro", "Digite o número do processo.");
             return;
@@ -155,37 +164,48 @@ export default function Api({ navigation }) {
             Alert.alert("Erro", "Selecione um tribunal.");
             return;
         }
+
         setCarregando(true);
-        if (!paginando) setDados([]);
+        setDados([]);  // Limpa os dados antes de nova pesquisa
 
         try {
             const url = `https://api-publica.datajud.cnj.jus.br/${tribunalSelecionado}/_search`;
             let query = {
                 size: 10,
-                query: { match: { numeroProcesso: input.trim() } },
-                sort: [{ "@timestamp": { order: "asc" } }]
+                query: {
+                    bool: {
+                        must: [
+                            { match: { numeroProcesso: input.trim() } },
+                            { match: { classe: classeSelecionada } },
+                            { match: { grau: grauSelecionado } }
+                        ]
+                    }
+                },
+                sort: [
+                    {
+                        "@timestamp": { order: "asc" }
+                    }
+                ]
             };
-            if (paginando && ultimaPaginacao) {
-                query.search_after = ultimaPaginacao;
-            }
+
             const resposta = await axios.post(url, query, {
                 headers: {
                     Authorization: "APIKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==",
                     'Content-Type': 'application/json'
                 }
             });
+
             if (resposta.data?.hits?.hits?.length > 0) {
                 const novosDados = resposta.data.hits.hits;
-                setDados(prev => [...prev, ...novosDados]);
-                const ultimo = novosDados[novosDados.length - 1];
-                setUltimaPaginacao(ultimo.sort);
+                setDados(novosDados);
             } else {
-                if (!paginando) Alert.alert("Nada encontrado", "Nenhuma informação para esse processo.");
+                Alert.alert("Nada encontrado", "Nenhuma informação para esse processo.");
             }
         } catch (erro) {
             Alert.alert("Erro", "Falha na busca.");
             console.error(erro.response?.data || erro.message);
         }
+
         setCarregando(false);
     };
 
@@ -200,126 +220,92 @@ export default function Api({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.titulo}>Pesquisa Avançada</Text>
+
+            <Picker
+                selectedValue={tipoJusticaSelecionado}
+                onValueChange={(itemValue) => {
+                    setTipoJusticaSelecionado(itemValue);
+                    const filtrados = tribunais.filter(t => t.tipo === itemValue);
+                    setTribunaisFiltrados(filtrados);
+                    setTribunalSelecionado('');
+                }}
+                style={styles.picker}
+            >
+                <Picker.Item label="Selecione o tipo de tribunal" value="" />
+                {tiposJustica.map((tipo, i) => (
+                    <Picker.Item key={i} label={tipo.label} value={tipo.value} />
+                ))}
+            </Picker>
+
+            {tipoJusticaSelecionado !== '' && (
+                <Picker
+                    selectedValue={tribunalSelecionado}
+                    onValueChange={(v) => setTribunalSelecionado(v)}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Selecione o tribunal" value="" />
+                    {tribunaisFiltrados.map((tribunal, i) => (
+                        <Picker.Item key={i} label={tribunal.nome} value={tribunal.url} />
+                    ))}
+                </Picker>
+            )}
+
+            <TextInput
+                style={styles.input}
+                placeholder="Digite o número do processo"
+                value={input}
+                onChangeText={setInput}
+                keyboardType={'numeric'}
+            />
+
+            <Picker
+                selectedValue={classeSelecionada}
+                onValueChange={(v) => setClasseSelecionada(v)}
+                style={styles.picker}
+            >
+                <Picker.Item label="Selecione a classe" value="" />
+                {classes.map((classe, i) => (
+                    <Picker.Item key={i} label={classe.label} value={classe.value} />
+                ))}
+            </Picker>
+
+            <Picker
+                selectedValue={grauSelecionado}
+                onValueChange={(v) => setGrauSelecionado(v)}
+                style={styles.picker}
+            >
+                <Picker.Item label="Selecione o grau" value="" />
+                {graus.map((grau, i) => (
+                    <Picker.Item key={i} label={grau.label} value={grau.value} />
+                ))}
+            </Picker>
+
+            <Button title="Buscar" onPress={buscarDados} disabled={carregando} />
+
+            {carregando && <ActivityIndicator size="large" color="#007bff" style={{ marginVertical: 20 }} />}
+
             <FlatList
-                ListHeaderComponent={
-                    <View>
-                        <Text style={styles.titulo}>Busca por número de processo:</Text>
-
-                        <Picker
-                            selectedValue={tipoJusticaSelecionado}
-                            onValueChange={(itemValue) => {
-                                setTipoJusticaSelecionado(itemValue);
-                                const filtrados = tribunais.filter(t => t.tipo === itemValue);
-                                setTribunaisFiltrados(filtrados);
-                                setTribunalSelecionado('');
-                            }}
-                            style={styles.picker}
-                        >
-                            <Picker.Item label="Selecione o tipo de tribunal" value="" />
-                            {tiposJustica.map((tipo, i) => (
-                                <Picker.Item
-                                    key={i}
-                                    label={tipo.label}
-                                    value={tipo.value}
-                                    style={{
-                                        backgroundColor: tipoJusticaSelecionado === tipo.value ? '#d6e0f0' : 'transparent',  // Azul claro
-                                        color: tipoJusticaSelecionado === tipo.value ? '#003366' : 'black', // Cor de texto para o item selecionado
-                                    }}
-                                />
-                            ))}
-                        </Picker>
-
-                        {tipoJusticaSelecionado !== '' && (
-                            <Picker
-                                selectedValue={tribunalSelecionado}
-                                onValueChange={(v) => setTribunalSelecionado(v)}
-                                style={styles.picker}
-                            >
-                                <Picker.Item label="Selecione o tribunal" value="" />
-                                {tribunaisFiltrados.map((tribunal, i) => (
-                                    <Picker.Item
-                                        key={i}
-                                        label={tribunal.nome}
-                                        value={tribunal.url}
-                                        style={{
-                                            backgroundColor: tribunalSelecionado === tribunal.url ? '#d6e0f0' : 'transparent', // Azul claro
-                                            color: tribunalSelecionado === tribunal.url ? '#003366' : 'black', // Cor de texto para o item selecionado
-                                        }}
-                                    />
-                                ))}
-                            </Picker>
-                        )}
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Digite o número do processo"
-                            value={input}
-                            onChangeText={setInput}
-                            keyboardType={'numeric'}
-                        />
-
-                        <Button title="Buscar" onPress={() => buscarDados(false)} disabled={carregando} />
-
-                        {dados.length > 0 && (
-                            <View style={{ marginVertical: 10 }}>
-                                <Button title="Nova pesquisa" onPress={limparTela} color="orange" />
-                            </View>
-                        )}
-
-                        {carregando && <ActivityIndicator size="large" color="#007bff" style={{ marginVertical: 20 }} />}
-                    </View>
-                }
                 data={dados}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => {
                     const d = item._source || item;
-                    const partes = Array.isArray(d.partes)
-                        ? d.partes.map(p => {
-                            const nome = p.nome ?? 'Desconhecido';
-                            const tipo = p.tipoParte ?? 'Tipo não informado';
-                            const advs = Array.isArray(p.advogados)
-                                ? p.advogados.map(a => `${a.nome} (${a.numeroOAB})`).join('; ')
-                                : '';
-                            return `🙋 ${nome} - ${tipo}${advs ? `\n🧑\u200d⚖️ Adv: ${advs}` : ''}`;
-                        }).join('\n')
-                        : 'Não informado';
-
-                    const movimentacoes = Array.isArray(d.movimentos)
-                        ? d.movimentos.map(m => {
-                            const data = formatarData(m.dataHora);
-                            const desc = m.nome ?? 'Sem descrição';
-                            return `📌 ${data}: ${desc}`;
-                        }).join('\n')
-                        : 'Sem movimentações.';
-
                     return (
                         <View style={styles.item}>
                             <Text style={styles.tituloProcesso}>📄 Processo: <Text style={styles.valor}>{d.numeroProcesso}</Text></Text>
                             {d.tribunal && <Text style={styles.linha}>🏛️ Tribunal: <Text style={styles.valor}>{d.tribunal}</Text></Text>}
                             {d.grau && <Text style={styles.linha}>📚 Grau: <Text style={styles.valor}>{d.grau}</Text></Text>}
                             {d.classe?.nome && <Text style={styles.linha}>🏷️ Classe: <Text style={styles.valor}>{d.classe.nome}</Text></Text>}
-                            {d.assuntos && <Text style={styles.linha}>🧾 Assunto(s): <Text style={styles.valor}>{d.assuntos.map(a => a.nome).join(" | ")}</Text></Text>}
                             {d.dataAjuizamento && <Text style={styles.linha}>📅 Ajuizamento: <Text style={styles.valor}>{formatarData(d.dataAjuizamento)}</Text></Text>}
-                            {partes && <Text style={styles.linha}>👤 Partes:\n<Text style={styles.valor}>{partes}</Text></Text>}
-                            {movimentacoes && <Text style={styles.linha}>🗂️ Movimentações:\n<Text style={styles.valor}>{movimentacoes}</Text></Text>}
                         </View>
                     );
                 }}
-                ListFooterComponent={
-                    <View style={{ marginVertical: 20 }}>
-                        {dados.length > 0 && (
-                            <Button title="Carregar mais resultados" onPress={() => buscarDados(true)} disabled={carregando} />
-                        )}
-                        <View style={{ marginTop: 20 }}>
-                            <Button title="VOLTAR PARA A HOME" onPress={() => navigation.navigate('Home')} />
-                        </View>
-                    </View>
-                }
             />
-        </View>
+        </ScrollView>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         padding: 20,
@@ -341,10 +327,6 @@ const styles = StyleSheet.create({
         borderColor: '#999',
         marginBottom: 10,
         fontSize: 12,
-    },
-    selectedItem: {
-        backgroundColor: '#c8e6c9', // Cor para o item selecionado
-        color: '#00796b', // Cor do texto do item selecionado
     },
     item: {
         padding: 15,

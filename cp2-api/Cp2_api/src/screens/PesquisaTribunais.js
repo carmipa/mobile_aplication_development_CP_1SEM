@@ -1,43 +1,49 @@
-// Api.js com suporte a tema claro/escuro e botão de troca de tema
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, FlatList, Alert, ActivityIndicator, Keyboard, ScrollView, useColorScheme } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, FlatList, Alert, ActivityIndicator, Keyboard } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
-import { useThemeContext } from '../context/ThemeContext'; // ✅ Novo: acesso ao tema
+import { useThemeContext } from '../context/ThemeContext';
 
 export default function Api({ navigation }) {
     const [input, setInput] = useState('');
     const [dados, setDados] = useState([]);
     const [carregando, setCarregando] = useState(false);
     const [tribunalSelecionado, setTribunalSelecionado] = useState('');
+    const [tipoPesquisaSelecionado, setTipoPesquisaSelecionado] = useState('numeroProcesso');
     const [tipoJusticaSelecionado, setTipoJusticaSelecionado] = useState('');
-    const [tribunaisFiltrados, setTribunaisFiltrados] = useState([]);
     const [ultimaPaginacao, setUltimaPaginacao] = useState(null);
 
-    const { currentTheme, cycleTheme } = useThemeContext(); // ✅ Novo: acesso ao tema e troca
-
+    const { currentTheme } = useThemeContext();
     const isDark = currentTheme === 'dark';
     const backgroundColor = isDark ? '#000' : '#fff';
     const textColor = isDark ? '#fff' : '#000';
 
+    // Tipos de pesquisa (ex: número de processo, nome da parte, etc.)
+    const tiposPesquisa = [
+        { label: 'Número do Processo', value: 'numeroProcesso' },
+        { label: 'Nome da Parte', value: 'nomeParte' },
+        { label: 'OAB do Advogado', value: 'oabAdvogado' },
+        { label: 'CNPJ da Parte', value: 'cnpjParte' },
+    ];
+
+    // Tipos de Justiça para filtrar os tribunais
     const tiposJustica = [
         { label: 'Tribunais Superiores', value: 'Superior' },
         { label: 'Justiça Federal', value: 'Federal' },
         { label: 'Justiça Estadual', value: 'Estadual' },
         { label: 'Justiça do Trabalho', value: 'Trabalho' },
         { label: 'Justiça Eleitoral', value: 'Eleitoral' },
-        { label: 'Justiça Militar', value: 'Militar' }
+        { label: 'Justiça Militar', value: 'Militar' },
     ];
 
+    // Lista completa de tribunais (incluindo o item “Selecione um tribunal”)
     const tribunais = [
         { nome: 'Selecione um tribunal', url: '', tipo: '' },
-
         // Tribunais Superiores
         { nome: 'Tribunal Superior do Trabalho - TST', url: 'api_publica_tst', tipo: 'Superior' },
         { nome: 'Tribunal Superior Eleitoral - TSE', url: 'api_publica_tse', tipo: 'Superior' },
         { nome: 'Tribunal Superior de Justiça - STJ', url: 'api_publica_stj', tipo: 'Superior' },
         { nome: 'Tribunal Superior Militar - TSM', url: 'api_publica_stm', tipo: 'Superior' },
-
         // Justiça Federal
         { nome: 'Tribunal Regional Federal da 1ª Região - TRF1', url: 'api_publica_trf1', tipo: 'Federal' },
         { nome: 'Tribunal Regional Federal da 2ª Região - TRF2', url: 'api_publica_trf2', tipo: 'Federal' },
@@ -45,7 +51,6 @@ export default function Api({ navigation }) {
         { nome: 'Tribunal Regional Federal da 4ª Região - TRF4', url: 'api_publica_trf4', tipo: 'Federal' },
         { nome: 'Tribunal Regional Federal da 5ª Região - TRF5', url: 'api_publica_trf5', tipo: 'Federal' },
         { nome: 'Tribunal Regional Federal da 6ª Região - TRF6', url: 'api_publica_trf6', tipo: 'Federal' },
-
         // Justiça Estadual
         { nome: 'Tribunal de Justiça do Acre - TJ-AC', url: 'api_publica_tjac', tipo: 'Estadual' },
         { nome: 'Tribunal de Justiça de Alagoas - TJ-AL', url: 'api_publica_tjal', tipo: 'Estadual' },
@@ -72,9 +77,8 @@ export default function Api({ navigation }) {
         { nome: 'Tribunal de Justiça de Roraima - TJ-RR', url: 'api_publica_tjrr', tipo: 'Estadual' },
         { nome: 'Tribunal de Justiça de Santa Catarina - TJ-SC', url: 'api_publica_tjsc', tipo: 'Estadual' },
         { nome: 'Tribunal de Justiça de São Paulo TJ-SP', url: 'api_publica_tjsp', tipo: 'Estadual' },
-        { nome: 'Tribunal de Justiça de Sergipe -TJ-SE', url: 'api_publica_tjse', tipo: 'Estadual' },
+        { nome: 'Tribunal de Justiça de Sergipe - TJ-SE', url: 'api_publica_tjse', tipo: 'Estadual' },
         { nome: 'Tribunal de Justiça do Tocantins - TJ-TO', url: 'api_publica_tjto', tipo: 'Estadual' },
-
         // Justiça do Trabalho
         { nome: 'Tribunal Regional do Trabalho da 1ª Região - TRT1', url: 'api_publica_trt1', tipo: 'Trabalho' },
         { nome: 'Tribunal Regional do Trabalho da 2ª Região - TRT2', url: 'api_publica_trt2', tipo: 'Trabalho' },
@@ -100,7 +104,6 @@ export default function Api({ navigation }) {
         { nome: 'Tribunal Regional do Trabalho da 22ª Região - TRT22', url: 'api_publica_trt22', tipo: 'Trabalho' },
         { nome: 'Tribunal Regional do Trabalho da 23ª Região - TRT23', url: 'api_publica_trt23', tipo: 'Trabalho' },
         { nome: 'Tribunal Regional do Trabalho da 24ª Região - TRT24', url: 'api_publica_trt24', tipo: 'Trabalho' },
-
         // Justiça Eleitoral
         { nome: 'Tribunal Regional Eleitoral do Acre - TRE-AC', url: 'api_publica_tre-ac', tipo: 'Eleitoral' },
         { nome: 'Tribunal Regional Eleitoral de Alagoas - TRE-AL', url: 'api_publica_tre-al', tipo: 'Eleitoral' },
@@ -129,9 +132,8 @@ export default function Api({ navigation }) {
         { nome: 'Tribunal Regional Eleitoral de São Paulo - TRE-SP', url: 'api_publica_tre-sp', tipo: 'Eleitoral' },
         { nome: 'Tribunal Regional Eleitoral de Sergipe - TRE-SE', url: 'api_publica_tre-se', tipo: 'Eleitoral' },
         { nome: 'Tribunal Regional Eleitoral do Tocantins - TRE-TO', url: 'api_publica_tre-to', tipo: 'Eleitoral' },
-
         // Justiça Militar
-        { nome: 'Tribunal de Justiça Militar de Minas Gerais -TJM-MG', url: 'api_publica_tjmmg', tipo: 'Militar' },
+        { nome: 'Tribunal de Justiça Militar de Minas Gerais - TJM-MG', url: 'api_publica_tjmmg', tipo: 'Militar' },
         { nome: 'Tribunal de Justiça Militar do Rio Grande do Sul - TJM-RS', url: 'api_publica_tjmrs', tipo: 'Militar' },
         { nome: 'Tribunal de Justiça Militar de São Paulo - TJM-SP', url: 'api_publica_tjmsp', tipo: 'Militar' },
     ];
@@ -140,21 +142,23 @@ export default function Api({ navigation }) {
         setInput('');
         setDados([]);
         setTribunalSelecionado('');
+        setTipoPesquisaSelecionado('numeroProcesso');
         setTipoJusticaSelecionado('');
-        setTribunaisFiltrados([]);
         setUltimaPaginacao(null);
     };
 
     const buscarDados = async (paginando = false) => {
         Keyboard.dismiss();
+
         if (!input.trim()) {
-            Alert.alert("Erro", "Digite o número do processo.");
+            Alert.alert("Erro", "Digite o valor para pesquisa.");
             return;
         }
         if (!tribunalSelecionado) {
             Alert.alert("Erro", "Selecione um tribunal.");
             return;
         }
+
         setCarregando(true);
         if (!paginando) setDados([]);
 
@@ -162,18 +166,25 @@ export default function Api({ navigation }) {
             const url = `https://api-publica.datajud.cnj.jus.br/${tribunalSelecionado}/_search`;
             let query = {
                 size: 10,
-                query: { match: { numeroProcesso: input.trim() } },
-                sort: [{ "@timestamp": { order: "asc" } }]
+                query: {
+                    match: {
+                        [tipoPesquisaSelecionado]: input.trim(),
+                    },
+                },
+                sort: [{ "@timestamp": { order: "asc" } }],
             };
+
             if (paginando && ultimaPaginacao) {
                 query.search_after = ultimaPaginacao;
             }
+
             const resposta = await axios.post(url, query, {
                 headers: {
                     Authorization: "APIKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==",
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             });
+
             if (resposta.data?.hits?.hits?.length > 0) {
                 const novosDados = resposta.data.hits.hits;
                 setDados(prev => [...prev, ...novosDados]);
@@ -186,6 +197,7 @@ export default function Api({ navigation }) {
             Alert.alert("Erro", "Falha na busca.");
             console.error(erro.response?.data || erro.message);
         }
+
         setCarregando(false);
     };
 
@@ -199,74 +211,65 @@ export default function Api({ navigation }) {
         }
     };
 
+    // Define a lista de tribunais que será exibida: se um tipo de Justiça foi selecionado, filtra os tribunais; caso contrário, exibe todos.
+    const tribunaisParaExibir = tipoJusticaSelecionado
+        ? tribunais.filter(t => t.tipo === tipoJusticaSelecionado)
+        : tribunais;
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor }]}>
             <FlatList
                 ListHeaderComponent={
                     <View>
-                        <Text style={styles.titulo}>Busca por número de processo:</Text>
+                        <Text style={[styles.titulo, { color: textColor }]}>Pesquisa Avançada</Text>
 
+                        {/* Picker para tipo de pesquisa */}
+                        <Picker
+                            selectedValue={tipoPesquisaSelecionado}
+                            onValueChange={(itemValue) => setTipoPesquisaSelecionado(itemValue)}
+                            style={styles.picker}
+                        >
+                            {tiposPesquisa.map((tipo, i) => (
+                                <Picker.Item key={i} label={tipo.label} value={tipo.value} />
+                            ))}
+                        </Picker>
+
+                        {/* Picker para selecionar o tipo de Justiça */}
                         <Picker
                             selectedValue={tipoJusticaSelecionado}
                             onValueChange={(itemValue) => {
                                 setTipoJusticaSelecionado(itemValue);
-                                const filtrados = tribunais.filter(t => t.tipo === itemValue);
-                                setTribunaisFiltrados(filtrados);
+                                // Ao alterar o tipo de Justiça, reinicia o tribunal selecionado
                                 setTribunalSelecionado('');
                             }}
                             style={styles.picker}
                         >
-                            <Picker.Item label="Selecione o tipo de tribunal" value="" />
+                            <Picker.Item label="Selecione o tipo de Justiça" value="" />
                             {tiposJustica.map((tipo, i) => (
-                                <Picker.Item
-                                    key={i}
-                                    label={tipo.label}
-                                    value={tipo.value}
-                                    style={{
-                                        backgroundColor: tipoJusticaSelecionado === tipo.value ? '#d6e0f0' : 'transparent',  // Azul claro
-                                        color: tipoJusticaSelecionado === tipo.value ? '#003366' : 'black', // Cor de texto para o item selecionado
-                                    }}
-                                />
+                                <Picker.Item key={i} label={tipo.label} value={tipo.value} />
                             ))}
                         </Picker>
 
-                        {tipoJusticaSelecionado !== '' && (
-                            <Picker
-                                selectedValue={tribunalSelecionado}
-                                onValueChange={(v) => setTribunalSelecionado(v)}
-                                style={styles.picker}
-                            >
-                                <Picker.Item label="Selecione o tribunal" value="" />
-                                {tribunaisFiltrados.map((tribunal, i) => (
-                                    <Picker.Item
-                                        key={i}
-                                        label={tribunal.nome}
-                                        value={tribunal.url}
-                                        style={{
-                                            backgroundColor: tribunalSelecionado === tribunal.url ? '#d6e0f0' : 'transparent', // Azul claro
-                                            color: tribunalSelecionado === tribunal.url ? '#003366' : 'black', // Cor de texto para o item selecionado
-                                        }}
-                                    />
-                                ))}
-                            </Picker>
-                        )}
+                        {/* Picker para selecionar o tribunal (filtrado, se houver um tipo de Justiça selecionado) */}
+                        <Picker
+                            selectedValue={tribunalSelecionado}
+                            onValueChange={(itemValue) => setTribunalSelecionado(itemValue)}
+                            style={styles.picker}
+                        >
+                            <Picker.Item label="Selecione o tribunal" value="" />
+                            {tribunaisParaExibir.map((tribunal) => (
+                                <Picker.Item key={tribunal.url} label={tribunal.nome} value={tribunal.url} />
+                            ))}
+                        </Picker>
 
                         <TextInput
                             style={styles.input}
-                            placeholder="Digite o número do processo"
+                            placeholder="Digite o valor para pesquisa"
                             value={input}
                             onChangeText={setInput}
-                            keyboardType={'numeric'}
                         />
 
                         <Button title="Buscar" onPress={() => buscarDados(false)} disabled={carregando} />
-
-                        {dados.length > 0 && (
-                            <View style={{ marginVertical: 10 }}>
-                                <Button title="Nova pesquisa" onPress={limparTela} color="orange" />
-                            </View>
-                        )}
-
                         {carregando && <ActivityIndicator size="large" color="#007bff" style={{ marginVertical: 20 }} />}
                     </View>
                 }
@@ -281,7 +284,7 @@ export default function Api({ navigation }) {
                             const advs = Array.isArray(p.advogados)
                                 ? p.advogados.map(a => `${a.nome} (${a.numeroOAB})`).join('; ')
                                 : '';
-                            return `🙋 ${nome} - ${tipo}${advs ? `\n🧑\u200d⚖️ Adv: ${advs}` : ''}`;
+                            return `🙋 ${nome} - ${tipo}${advs ? `\n🧑‍⚖️ Adv: ${advs}` : ''}`;
                         }).join('\n')
                         : 'Não informado';
 
@@ -295,56 +298,78 @@ export default function Api({ navigation }) {
 
                     return (
                         <View style={styles.item}>
-                            <Text style={styles.tituloProcesso}>📄 Processo: <Text style={styles.valor}>{d.numeroProcesso}</Text></Text>
-                            {d.tribunal && <Text style={styles.linha}>🏛️ Tribunal: <Text style={styles.valor}>{d.tribunal}</Text></Text>}
-                            {d.grau && <Text style={styles.linha}>📚 Grau: <Text style={styles.valor}>{d.grau}</Text></Text>}
-                            {d.classe?.nome && <Text style={styles.linha}>🏷️ Classe: <Text style={styles.valor}>{d.classe.nome}</Text></Text>}
-                            {d.assuntos && <Text style={styles.linha}>🧾 Assunto(s): <Text style={styles.valor}>{d.assuntos.map(a => a.nome).join(" | ")}</Text></Text>}
-                            {d.dataAjuizamento && <Text style={styles.linha}>📅 Ajuizamento: <Text style={styles.valor}>{formatarData(d.dataAjuizamento)}</Text></Text>}
-                            {partes && <Text style={styles.linha}>👤 Partes:\n<Text style={styles.valor}>{partes}</Text></Text>}
-                            {movimentacoes && <Text style={styles.linha}>🗂️ Movimentações:\n<Text style={styles.valor}>{movimentacoes}</Text></Text>}
+                            <Text style={styles.tituloProcesso}>
+                                📄 Processo: <Text style={styles.valor}>{d.numeroProcesso}</Text>
+                            </Text>
+                            {d.tribunal && (
+                                <Text style={styles.linha}>
+                                    🏛️ Tribunal: <Text style={styles.valor}>{d.tribunal}</Text>
+                                </Text>
+                            )}
+                            {d.grau && (
+                                <Text style={styles.linha}>
+                                    📚 Grau: <Text style={styles.valor}>{d.grau}</Text>
+                                </Text>
+                            )}
+                            {d.classe?.nome && (
+                                <Text style={styles.linha}>
+                                    🏷️ Classe: <Text style={styles.valor}>{d.classe.nome}</Text>
+                                </Text>
+                            )}
+                            {d.assuntos && (
+                                <Text style={styles.linha}>
+                                    🧾 Assunto(s): <Text style={styles.valor}>{d.assuntos.map(a => a.nome).join(" | ")}</Text>
+                                </Text>
+                            )}
+                            {d.dataAjuizamento && (
+                                <Text style={styles.linha}>
+                                    📅 Ajuizamento: <Text style={styles.valor}>{formatarData(d.dataAjuizamento)}</Text>
+                                </Text>
+                            )}
+                            {partes && (
+                                <Text style={styles.linha}>
+                                    👤 Partes:{'\n'}
+                                    <Text style={styles.valor}>{partes}</Text>
+                                </Text>
+                            )}
+                            {movimentacoes && (
+                                <Text style={styles.linha}>
+                                    🗂️ Movimentações:{'\n'}
+                                    <Text style={styles.valor}>{movimentacoes}</Text>
+                                </Text>
+                            )}
                         </View>
                     );
                 }}
                 ListFooterComponent={
                     <View style={{ marginVertical: 20 }}>
-                        {dados.length > 0 && (
-                            <Button title="Carregar mais resultados" onPress={() => buscarDados(true)} disabled={carregando} />
-                        )}
-                        <View style={{ marginTop: 20 }}>
-                            <Button title="VOLTAR PARA A HOME" onPress={() => navigation.navigate('Home')} />
-                        </View>
+                        <Button title="Carregar mais resultados" onPress={() => buscarDados(true)} disabled={carregando} />
                     </View>
                 }
             />
         </View>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         padding: 20,
-        backgroundColor: '#fff'
     },
     titulo: {
         fontSize: 20,
-        marginBottom: 10
+        marginBottom: 10,
     },
     input: {
         borderWidth: 1,
         borderColor: '#999',
         padding: 10,
         borderRadius: 5,
-        marginBottom: 10
+        marginBottom: 10,
     },
     picker: {
         borderWidth: 1,
         borderColor: '#999',
         marginBottom: 10,
-        fontSize: 12,
-    },
-    selectedItem: {
-        backgroundColor: '#c8e6c9', // Cor para o item selecionado
-        color: '#00796b', // Cor do texto do item selecionado
     },
     item: {
         padding: 15,
@@ -352,20 +377,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#eaf4ff',
         borderLeftWidth: 5,
         borderLeftColor: '#007bff',
-        borderRadius: 8
+        borderRadius: 8,
     },
     tituloProcesso: {
         fontWeight: 'bold',
         fontSize: 17,
         marginBottom: 6,
-        color: '#003366'
     },
     linha: {
         fontSize: 15,
-        marginBottom: 4
+        marginBottom: 4,
     },
     valor: {
         fontWeight: '600',
-        color: '#333'
-    }
+        color: '#333',
+    },
 });
