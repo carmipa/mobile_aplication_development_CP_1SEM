@@ -3,7 +3,7 @@ import { Feather } from "@expo/vector-icons";
 import Home from "../screens/Home";
 import Api from "../screens/Api";
 import PesquisaAvancada from "../screens/PesquisaAvancada";
-import PesquisaTribunais from "../screens/PesquisaTribunais"
+
 
 const Drawer = createDrawerNavigator();
 
@@ -51,16 +51,7 @@ export default function DrawerRoutes() {
                 }}
             />
 
-            <Drawer.Screen
-                name="PesquisaTribunais"
-                component={PesquisaTribunais}
-                options={{
-                    drawerLabel: 'Busca por tribunais', // 📝 Nome atualizado para clareza
-                    drawerIcon: ({ color, size }) => (
-                        <Feather name="search" size={size} color={color} /> // 🔍 Ícone mais apropriado
-                    ),
-                }}
-            />
+
         </Drawer.Navigator>
     );
 }
