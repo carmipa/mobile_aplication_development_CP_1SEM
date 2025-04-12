@@ -15,7 +15,7 @@ Este repositório centraliza os trabalhos desenvolvidos na disciplina **Mobile A
 
 ## 🎯 CP1 2025
 
-   - **Integrantes do CP:**  
+**Integrantes do CP:**  
    - **Paulo André Carminati RM557881**  
 
 
@@ -25,7 +25,7 @@ Este repositório centraliza os trabalhos desenvolvidos na disciplina **Mobile A
 
 ## 🎯 CP2 2025
 
-   - **Integrantes do CP:**  
+**Integrantes do CP:**  
    - **Amanda Mesquita Cirino Da Silva** - RM559177 [🔗 GitHub](https://github.com/mandyy14)
    - **Journey Tiago Lopes Ferreira** - RM556071 - [🔗 GitHub](https://github.com/JouTiago)
    - **Paulo André Carminati** - RM557881 - [🔗 GitHub](https://github.com/carmipa)
