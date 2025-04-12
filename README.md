@@ -31,4 +31,4 @@ Este repositório centraliza os trabalhos desenvolvidos na disciplina **Mobile A
    - **Paulo André Carminati** - RM557881 - [🔗 GitHub](https://github.com/carmipa)
 
 
-**Repositório no GitHub:** [CP1 Mobile](https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp2/Cp2_api)
+**Repositório no GitHub:** [CP2 Mobile](https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp2/Cp2_api)
