@@ -14,4 +14,4 @@ Trabalho em equipe de até **3 integrantes**
 
 
 ### 📁 Repositório no GitHub
-[🔗 Acesse o projeto no GitHub](https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp2/Cp2_api)
+[🔗 Acesse o projeto no GitHub](https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp1/cp1_rm557881-Paulo)
