@@ -1,8 +1,10 @@
 # 🎯 Checkpoint 2 - Mobile 2025
 
 ## 📌 Membros do Grupo do CP2
-- **Paulo André Carminati** - RM557881  
-- **Gabielly Campos Macedo** - RM558962  
+
+- **Amanda Mesquita Cirino Da Silva** - RM559177 [🔗 GitHub](https://github.com/mandyy14)
+- **Journey Tiago Lopes Ferreira** - RM556071 - [🔗 GitHub](https://github.com/JouTiago)
+- **Paulo André Carminati** - RM557881 - [🔗 GitHub](https://github.com/carmipa)
 
 ---
 
