@@ -1,11 +1,25 @@
-// Api.js com suporte a tema claro/escuro e botão de troca de tema
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, FlatList, Alert, ActivityIndicator, Keyboard, ScrollView, useColorScheme } from 'react-native';
+// Api.js CORRIGIDO - Preservando a lista de tribunais e com estilos no final
+import React, { useState, useMemo } from 'react'; // Importa useMemo
+import {
+    StyleSheet,
+    Text,
+    View,
+    TextInput,
+    Button,
+    FlatList,
+    Alert,
+    ActivityIndicator,
+    Keyboard,
+    ScrollView // ScrollView não está sendo usado diretamente aqui, mas pode ser útil
+    // useColorScheme foi removido pois usamos o ThemeContext
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
-import { useThemeContext } from '../context/ThemeContext'; // ✅ Novo: acesso ao tema
+import { useThemeContext } from '../context/ThemeContext'; // ✅ Acesso ao tema
 
+// --- Componente Principal ---
 export default function Api({ navigation }) {
+    // --- Seus States ---
     const [input, setInput] = useState('');
     const [dados, setDados] = useState([]);
     const [carregando, setCarregando] = useState(false);
@@ -14,12 +28,15 @@ export default function Api({ navigation }) {
     const [tribunaisFiltrados, setTribunaisFiltrados] = useState([]);
     const [ultimaPaginacao, setUltimaPaginacao] = useState(null);
 
-    const { currentTheme, cycleTheme } = useThemeContext(); // ✅ Novo: acesso ao tema e troca
-
+    // --- Acesso e Cálculo do Tema ---
+    const { currentTheme } = useThemeContext(); // Não precisamos do cycleTheme aqui por enquanto
     const isDark = currentTheme === 'dark';
-    const backgroundColor = isDark ? '#000' : '#fff';
-    const textColor = isDark ? '#fff' : '#000';
 
+    // --- Gera os estilos MEMOIZADOS chamando a função no final do arquivo ---
+    // useMemo garante que getThemedStyles só é chamado se 'isDark' mudar
+    const styles = useMemo(() => getThemedStyles(isDark), [isDark]);
+
+    // --- Suas Listas de Tipos e Tribunais (INTACTAS) ---
     const tiposJustica = [
         { label: 'Tribunais Superiores', value: 'Superior' },
         { label: 'Justiça Federal', value: 'Federal' },
@@ -29,15 +46,14 @@ export default function Api({ navigation }) {
         { label: 'Justiça Militar', value: 'Militar' }
     ];
 
+    // 👇 SUA LISTA COMPLETA DE TRIBUNAIS PRESERVADA 👇
     const tribunais = [
         { nome: 'Selecione um tribunal', url: '', tipo: '' },
-
         // Tribunais Superiores
         { nome: 'Tribunal Superior do Trabalho - TST', url: 'api_publica_tst', tipo: 'Superior' },
         { nome: 'Tribunal Superior Eleitoral - TSE', url: 'api_publica_tse', tipo: 'Superior' },
         { nome: 'Tribunal Superior de Justiça - STJ', url: 'api_publica_stj', tipo: 'Superior' },
         { nome: 'Tribunal Superior Militar - TSM', url: 'api_publica_stm', tipo: 'Superior' },
-
         // Justiça Federal
         { nome: 'Tribunal Regional Federal da 1ª Região - TRF1', url: 'api_publica_trf1', tipo: 'Federal' },
         { nome: 'Tribunal Regional Federal da 2ª Região - TRF2', url: 'api_publica_trf2', tipo: 'Federal' },
@@ -45,7 +61,6 @@ export default function Api({ navigation }) {
         { nome: 'Tribunal Regional Federal da 4ª Região - TRF4', url: 'api_publica_trf4', tipo: 'Federal' },
         { nome: 'Tribunal Regional Federal da 5ª Região - TRF5', url: 'api_publica_trf5', tipo: 'Federal' },
         { nome: 'Tribunal Regional Federal da 6ª Região - TRF6', url: 'api_publica_trf6', tipo: 'Federal' },
-
         // Justiça Estadual
         { nome: 'Tribunal de Justiça do Acre - TJ-AC', url: 'api_publica_tjac', tipo: 'Estadual' },
         { nome: 'Tribunal de Justiça de Alagoas - TJ-AL', url: 'api_publica_tjal', tipo: 'Estadual' },
@@ -74,7 +89,6 @@ export default function Api({ navigation }) {
         { nome: 'Tribunal de Justiça de São Paulo TJ-SP', url: 'api_publica_tjsp', tipo: 'Estadual' },
         { nome: 'Tribunal de Justiça de Sergipe -TJ-SE', url: 'api_publica_tjse', tipo: 'Estadual' },
         { nome: 'Tribunal de Justiça do Tocantins - TJ-TO', url: 'api_publica_tjto', tipo: 'Estadual' },
-
         // Justiça do Trabalho
         { nome: 'Tribunal Regional do Trabalho da 1ª Região - TRT1', url: 'api_publica_trt1', tipo: 'Trabalho' },
         { nome: 'Tribunal Regional do Trabalho da 2ª Região - TRT2', url: 'api_publica_trt2', tipo: 'Trabalho' },
@@ -100,7 +114,6 @@ export default function Api({ navigation }) {
         { nome: 'Tribunal Regional do Trabalho da 22ª Região - TRT22', url: 'api_publica_trt22', tipo: 'Trabalho' },
         { nome: 'Tribunal Regional do Trabalho da 23ª Região - TRT23', url: 'api_publica_trt23', tipo: 'Trabalho' },
         { nome: 'Tribunal Regional do Trabalho da 24ª Região - TRT24', url: 'api_publica_trt24', tipo: 'Trabalho' },
-
         // Justiça Eleitoral
         { nome: 'Tribunal Regional Eleitoral do Acre - TRE-AC', url: 'api_publica_tre-ac', tipo: 'Eleitoral' },
         { nome: 'Tribunal Regional Eleitoral de Alagoas - TRE-AL', url: 'api_publica_tre-al', tipo: 'Eleitoral' },
@@ -129,13 +142,14 @@ export default function Api({ navigation }) {
         { nome: 'Tribunal Regional Eleitoral de São Paulo - TRE-SP', url: 'api_publica_tre-sp', tipo: 'Eleitoral' },
         { nome: 'Tribunal Regional Eleitoral de Sergipe - TRE-SE', url: 'api_publica_tre-se', tipo: 'Eleitoral' },
         { nome: 'Tribunal Regional Eleitoral do Tocantins - TRE-TO', url: 'api_publica_tre-to', tipo: 'Eleitoral' },
-
         // Justiça Militar
         { nome: 'Tribunal de Justiça Militar de Minas Gerais -TJM-MG', url: 'api_publica_tjmmg', tipo: 'Militar' },
         { nome: 'Tribunal de Justiça Militar do Rio Grande do Sul - TJM-RS', url: 'api_publica_tjmrs', tipo: 'Militar' },
         { nome: 'Tribunal de Justiça Militar de São Paulo - TJM-SP', url: 'api_publica_tjmsp', tipo: 'Militar' },
     ];
+    // ☝️ SUA LISTA COMPLETA DE TRIBUNAIS PRESERVADA ☝️
 
+    // --- Suas Funções (INTACTAS) ---
     const limparTela = () => {
         setInput('');
         setDados([]);
@@ -193,179 +207,324 @@ export default function Api({ navigation }) {
         if (!dataStr) return "Não informada";
         try {
             const date = new Date(dataStr);
+            // Verifica se a data é válida antes de formatar
+            if (isNaN(date.getTime())) {
+                return dataStr; // Retorna a string original se inválida
+            }
             return date.toLocaleDateString('pt-BR');
         } catch {
-            return dataStr;
+            return dataStr; // Retorna a string original em caso de erro
         }
     };
 
+    // --- Renderização do Componente ---
+    // O JSX abaixo usa os 'styles' gerados pelo useMemo/getThemedStyles
     return (
         <View style={styles.container}>
             <FlatList
+                contentContainerStyle={styles.contentContainer}
+                // Evita que o teclado esconda o input/botões
+                keyboardShouldPersistTaps="handled"
                 ListHeaderComponent={
                     <View>
                         <Text style={styles.titulo}>Busca por número de processo:</Text>
 
-                        <Picker
-                            selectedValue={tipoJusticaSelecionado}
-                            onValueChange={(itemValue) => {
-                                setTipoJusticaSelecionado(itemValue);
-                                const filtrados = tribunais.filter(t => t.tipo === itemValue);
-                                setTribunaisFiltrados(filtrados);
-                                setTribunalSelecionado('');
-                            }}
-                            style={styles.picker}
-                        >
-                            <Picker.Item label="Selecione o tipo de tribunal" value="" />
-                            {tiposJustica.map((tipo, i) => (
-                                <Picker.Item
-                                    key={i}
-                                    label={tipo.label}
-                                    value={tipo.value}
-                                    style={{
-                                        backgroundColor: tipoJusticaSelecionado === tipo.value ? '#d6e0f0' : 'transparent',  // Azul claro
-                                        color: tipoJusticaSelecionado === tipo.value ? '#003366' : 'black', // Cor de texto para o item selecionado
-                                    }}
-                                />
-                            ))}
-                        </Picker>
-
-                        {tipoJusticaSelecionado !== '' && (
+                        {/* Picker Tipo Justiça */}
+                        <View style={styles.pickerContainer}>
                             <Picker
-                                selectedValue={tribunalSelecionado}
-                                onValueChange={(v) => setTribunalSelecionado(v)}
+                                selectedValue={tipoJusticaSelecionado}
+                                onValueChange={(itemValue) => {
+                                    setTipoJusticaSelecionado(itemValue);
+                                    const filtrados = tribunais.filter(t => t.tipo === itemValue);
+                                    setTribunaisFiltrados(filtrados);
+                                    setTribunalSelecionado(''); // Limpa tribunal ao mudar tipo
+                                }}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="Selecione o tribunal" value="" />
-                                {tribunaisFiltrados.map((tribunal, i) => (
+                                <Picker.Item label="Selecione o tipo de tribunal" value="" style={styles.pickerItemStyle} />
+                                {tiposJustica.map((tipo, i) => (
                                     <Picker.Item
-                                        key={i}
-                                        label={tribunal.nome}
-                                        value={tribunal.url}
-                                        style={{
-                                            backgroundColor: tribunalSelecionado === tribunal.url ? '#d6e0f0' : 'transparent', // Azul claro
-                                            color: tribunalSelecionado === tribunal.url ? '#003366' : 'black', // Cor de texto para o item selecionado
-                                        }}
+                                        key={`${tipo.value}-${i}`} // Chave mais robusta
+                                        label={tipo.label}
+                                        value={tipo.value}
+                                        style={tipoJusticaSelecionado === tipo.value
+                                            ? styles.pickerItemSelectedStyle
+                                            : styles.pickerItemStyle
+                                        }
                                     />
                                 ))}
                             </Picker>
+                        </View>
+
+                        {/* Picker Tribunal */}
+                        {tipoJusticaSelecionado !== '' && (
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={tribunalSelecionado}
+                                    onValueChange={(itemValue) => setTribunalSelecionado(itemValue)}
+                                    style={styles.picker}
+                                    enabled={tribunaisFiltrados.length > 0} // Desabilita se não houver tribunais
+                                >
+                                    <Picker.Item label="Selecione o tribunal" value="" style={styles.pickerItemStyle}/>
+                                    {tribunaisFiltrados.map((tribunal, i) => (
+                                        <Picker.Item
+                                            key={`${tribunal.url}-${i}`} // Chave mais robusta
+                                            label={tribunal.nome}
+                                            value={tribunal.url}
+                                            style={tribunalSelecionado === tribunal.url
+                                                ? styles.pickerItemSelectedStyle
+                                                : styles.pickerItemStyle
+                                            }
+                                        />
+                                    ))}
+                                </Picker>
+                            </View>
                         )}
 
+                        {/* Input Número Processo */}
                         <TextInput
                             style={styles.input}
                             placeholder="Digite o número do processo"
                             value={input}
                             onChangeText={setInput}
                             keyboardType={'numeric'}
+                            placeholderTextColor={styles.placeholderTextColor} // Cor dinâmica
+                            onSubmitEditing={() => buscarDados(false)} // Permite buscar com Enter/Go
+                            returnKeyType="search" // Melhora UX do teclado
                         />
 
-                        <Button title="Buscar" onPress={() => buscarDados(false)} disabled={carregando} />
+                        {/* Botão Buscar */}
+                        <View style={styles.buttonContainer}>
+                            <Button
+                                title="Buscar"
+                                onPress={() => buscarDados(false)}
+                                disabled={carregando || !tribunalSelecionado || !input} // Desabilita se carregando ou sem dados
+                                color={styles.primaryColor} // Cor dinâmica
+                            />
+                        </View>
 
-                        {dados.length > 0 && (
-                            <View style={{ marginVertical: 10 }}>
-                                <Button title="Nova pesquisa" onPress={limparTela} color="orange" />
+                        {/* Botão Nova Pesquisa */}
+                        {dados.length > 0 && !carregando && (
+                            <View style={styles.buttonContainer}>
+                                <Button
+                                    title="Nova pesquisa"
+                                    onPress={limparTela}
+                                    color={styles.secondaryButtonColor} // Cor específica mantida
+                                />
                             </View>
                         )}
 
-                        {carregando && <ActivityIndicator size="large" color="#007bff" style={{ marginVertical: 20 }} />}
+                        {/* Loading */}
+                        {carregando && (
+                            <ActivityIndicator
+                                size="large"
+                                color={styles.primaryColor} // Cor dinâmica
+                                style={styles.activityIndicator}
+                            />
+                        )}
                     </View>
                 }
                 data={dados}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item, index) => item._id || index.toString()} // Usa _id se disponível
                 renderItem={({ item }) => {
-                    const d = item._source || item;
+                    const d = item._source || item; // Usa _source se presente
+
+                    // Formatação robusta das partes e advogados
                     const partes = Array.isArray(d.partes)
-                        ? d.partes.map(p => {
-                            const nome = p.nome ?? 'Desconhecido';
-                            const tipo = p.tipoParte ?? 'Tipo não informado';
-                            const advs = Array.isArray(p.advogados)
-                                ? p.advogados.map(a => `${a.nome} (${a.numeroOAB})`).join('; ')
+                        ? d.partes.map((p, idx) => {
+                            const nome = p.nome || 'Nome não informado';
+                            const tipo = p.tipoParte || 'Tipo não informado';
+                            const advogados = Array.isArray(p.advogados)
+                                ? p.advogados.map(a => `${a.nome || 'Advogado'} (${a.numeroOAB || 'OAB'})`).join('; ')
                                 : '';
-                            return `🙋 ${nome} - ${tipo}${advs ? `\n🧑\u200d⚖️ Adv: ${advs}` : ''}`;
+                            return `🙋 ${nome} (${tipo})${advogados ? `\n   🧑‍⚖️ Adv: ${advogados}` : ''}`;
                         }).join('\n')
-                        : 'Não informado';
+                        : 'Partes não informadas';
 
-                    const movimentacoes = Array.isArray(d.movimentos)
-                        ? d.movimentos.map(m => {
+                    // Formatação das movimentações
+                    const movimentacoes = Array.isArray(d.movimentos) && d.movimentos.length > 0
+                        ? d.movimentos.map((m, idx) => {
                             const data = formatarData(m.dataHora);
-                            const desc = m.nome ?? 'Sem descrição';
-                            return `📌 ${data}: ${desc}`;
+                            const nomeMovimento = m.nome || 'Movimento sem nome';
+                            // Adicionar detalhes se existirem (pode precisar de ajuste conforme a API)
+                            const complemento = m.complemento ? ` (${m.complemento})` : '';
+                            return `📌 ${data}: ${nomeMovimento}${complemento}`;
                         }).join('\n')
-                        : 'Sem movimentações.';
+                        : 'Sem movimentações registradas.';
 
+                    // Renderiza o item da lista
                     return (
                         <View style={styles.item}>
-                            <Text style={styles.tituloProcesso}>📄 Processo: <Text style={styles.valor}>{d.numeroProcesso}</Text></Text>
+                            <Text style={styles.tituloProcesso}>
+                                📄 Processo: <Text style={styles.valor}>{d.numeroProcesso || 'Número não disponível'}</Text>
+                            </Text>
                             {d.tribunal && <Text style={styles.linha}>🏛️ Tribunal: <Text style={styles.valor}>{d.tribunal}</Text></Text>}
                             {d.grau && <Text style={styles.linha}>📚 Grau: <Text style={styles.valor}>{d.grau}</Text></Text>}
                             {d.classe?.nome && <Text style={styles.linha}>🏷️ Classe: <Text style={styles.valor}>{d.classe.nome}</Text></Text>}
-                            {d.assuntos && <Text style={styles.linha}>🧾 Assunto(s): <Text style={styles.valor}>{d.assuntos.map(a => a.nome).join(" | ")}</Text></Text>}
+                            {Array.isArray(d.assuntos) && d.assuntos.length > 0 && (
+                                <Text style={styles.linha}>
+                                    🧾 Assunto(s): <Text style={styles.valor}>{d.assuntos.map(a => a.nome || 'Assunto').join(" | ")}</Text>
+                                </Text>
+                            )}
                             {d.dataAjuizamento && <Text style={styles.linha}>📅 Ajuizamento: <Text style={styles.valor}>{formatarData(d.dataAjuizamento)}</Text></Text>}
-                            {partes && <Text style={styles.linha}>👤 Partes:\n<Text style={styles.valor}>{partes}</Text></Text>}
-                            {movimentacoes && <Text style={styles.linha}>🗂️ Movimentações:\n<Text style={styles.valor}>{movimentacoes}</Text></Text>}
+                            {partes && <Text style={styles.linha}>👤 Partes:{'\n'}<Text style={styles.valor}>{partes}</Text></Text>}
+                            <Text style={styles.linha}>🗂️ Movimentações:{'\n'}<Text style={styles.valor}>{movimentacoes}</Text></Text>
                         </View>
                     );
                 }}
                 ListFooterComponent={
-                    <View style={{ marginVertical: 20 }}>
-                        {dados.length > 0 && (
-                            <Button title="Carregar mais resultados" onPress={() => buscarDados(true)} disabled={carregando} />
-                        )}
-                        <View style={{ marginTop: 20 }}>
-                            <Button title="VOLTAR PARA A HOME" onPress={() => navigation.navigate('Home')} />
+                    // Garante que os botões só apareçam se houver dados ou carregando
+                    (dados.length > 0 || carregando) ? (
+                        <View style={styles.footerButtons}>
+                            {/* Botão Carregar Mais */}
+                            {dados.length > 0 && ultimaPaginacao && !carregando && ( // Mostra apenas se pode carregar mais e não está carregando
+                                <View style={styles.buttonContainer}>
+                                    <Button
+                                        title="Carregar mais resultados"
+                                        onPress={() => buscarDados(true)}
+                                        disabled={carregando}
+                                        color={styles.primaryColor} // Cor dinâmica
+                                    />
+                                </View>
+                            )}
+                            {/* Botão Voltar */}
+                            <View style={styles.buttonContainer}>
+                                <Button
+                                    title="VOLTAR PARA A HOME"
+                                    onPress={() => navigation.navigate('Home')}
+                                    color={styles.primaryColor} // Cor dinâmica
+                                    disabled={carregando} // Desabilita enquanto carrega
+                                />
+                            </View>
                         </View>
-                    </View>
+                    ) : null // Não mostra o footer se não houver dados e não estiver carregando
                 }
+                // Indicador de 'sem resultados' (opcional)
+                // ListEmptyComponent={
+                //     !carregando && input && tribunalSelecionado ? ( // Mostra apenas se buscou e não achou
+                //         <View style={{alignItems: 'center', marginTop: 50}}>
+                //             <Text style={styles.linha}>Nenhum resultado encontrado.</Text>
+                //         </View>
+                //     ) : null
+                // }
             />
         </View>
     );
 }
-const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-        backgroundColor: '#fff'
-    },
-    titulo: {
-        fontSize: 20,
-        marginBottom: 10
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#999',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 10
-    },
-    picker: {
-        borderWidth: 1,
-        borderColor: '#999',
-        marginBottom: 10,
-        fontSize: 12,
-    },
-    selectedItem: {
-        backgroundColor: '#c8e6c9', // Cor para o item selecionado
-        color: '#00796b', // Cor do texto do item selecionado
-    },
-    item: {
-        padding: 15,
-        marginVertical: 6,
-        backgroundColor: '#eaf4ff',
-        borderLeftWidth: 5,
-        borderLeftColor: '#007bff',
-        borderRadius: 8
-    },
-    tituloProcesso: {
-        fontWeight: 'bold',
-        fontSize: 17,
-        marginBottom: 6,
-        color: '#003366'
-    },
-    linha: {
-        fontSize: 15,
-        marginBottom: 4
-    },
-    valor: {
-        fontWeight: '600',
-        color: '#333'
-    }
-});
+
+// --- Função para gerar estilos dinâmicos (NO FINAL DO ARQUIVO) ---
+// Usar 'function' aqui permite hoisting, podendo ser chamada antes no código.
+function getThemedStyles(isDark) {
+    // --- Cores Base ---
+    const backgroundColor = isDark ? '#121212' : '#f8f9fa';
+    const textColor = isDark ? '#e0e0e0' : '#212529';
+    const borderColor = isDark ? '#444' : '#ced4da';
+    const placeholderTextColor = isDark ? '#777' : '#6c757d';
+    const primaryColor = isDark ? '#66bfff' : '#007bff';
+    const itemBackgroundColor = isDark ? '#1e1e1e' : '#ffffff'; // Fundo do item mais sutil no modo escuro
+    const itemBorderColor = primaryColor;
+    const titleColor = isDark ? '#bbdffd' : '#003366'; // Cor do título do processo adaptada
+    const valueColor = isDark ? '#b0b0b0' : '#343a40'; // Cor dos valores adaptada
+    const pickerBackgroundColor = isDark ? '#2a2a2a' : '#ffffff';
+    const pickerItemBgSelected = isDark ? '#004c99' : '#d6e0f0'; // Azul mais escuro no dark
+    const pickerItemColorSelected = isDark ? '#ffffff' : '#003366';
+    const secondaryButtonColor = 'orange'; // Mantida como laranja
+
+    // --- StyleSheet ---
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: backgroundColor,
+        },
+        contentContainer: {
+            padding: 20,
+            paddingBottom: 40, // Garante espaço extra no final
+        },
+        titulo: {
+            fontSize: 20,
+            marginBottom: 15,
+            fontWeight: 'bold',
+            color: textColor,
+            textAlign: 'center', // Centralizar título
+        },
+        input: {
+            borderWidth: 1,
+            borderColor: borderColor,
+            backgroundColor: isDark ? '#2a2a2a' : '#fff',
+            color: textColor,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            borderRadius: 5,
+            marginBottom: 15,
+            fontSize: 16, // Aumentar fonte do input
+        },
+        pickerContainer: {
+            borderWidth: 1,
+            borderColor: borderColor,
+            borderRadius: 5,
+            marginBottom: 15,
+            backgroundColor: pickerBackgroundColor,
+            justifyContent: 'center', // Centraliza o texto no Android
+        },
+        picker: {
+            color: textColor,
+            height: 50,
+            // Tentar remover width 100% se causar problemas
+        },
+        // Estilos dos itens do Picker (a serem aplicados via 'style' prop)
+        pickerItemStyle: {
+            color: textColor,
+            backgroundColor: pickerBackgroundColor,
+            //fontSize: 16 // (Opcional) Ajustar fonte dos itens
+        },
+        pickerItemSelectedStyle: {
+            color: pickerItemColorSelected,
+            backgroundColor: pickerItemBgSelected,
+            // fontSize: 16,
+            // fontWeight: 'bold' // (Opcional) Destacar selecionado
+        },
+        item: {
+            padding: 15,
+            marginVertical: 8,
+            backgroundColor: itemBackgroundColor,
+            borderLeftWidth: 5,
+            borderLeftColor: itemBorderColor,
+            borderRadius: 8,
+            shadowColor: "#000", // Sombra leve (opcional)
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: isDark ? 0.3 : 0.1,
+            shadowRadius: 2,
+            elevation: 2, // Elevação para Android
+        },
+        tituloProcesso: {
+            fontWeight: 'bold',
+            fontSize: 17,
+            marginBottom: 8,
+            color: titleColor,
+        },
+        linha: {
+            fontSize: 15,
+            marginBottom: 6, // Um pouco mais de espaço
+            color: textColor,
+            lineHeight: 22,
+        },
+        valor: {
+            color: valueColor,
+            fontWeight: '500', // Um pouco menos bold que o padrão
+        },
+        activityIndicator: {
+            marginVertical: 30, // Mais espaço vertical
+        },
+        buttonContainer: {
+            marginVertical: 8, // Menos espaço entre botões
+        },
+        footerButtons: {
+            marginTop: 20, // Espaço antes dos botões do footer
+            paddingBottom: 30,
+        },
+        // Exporta cores como "estilos" para serem usadas em props
+        placeholderTextColor: placeholderTextColor,
+        primaryColor: primaryColor,
+        secondaryButtonColor: secondaryButtonColor,
+    });
+};
