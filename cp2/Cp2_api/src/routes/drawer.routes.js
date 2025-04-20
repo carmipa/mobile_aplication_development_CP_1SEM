@@ -1,85 +1,94 @@
+// --- src/routes/drawer.routes.js ---
+import React from 'react';
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Feather } from "@expo/vector-icons";
-import Home from "../screens/Home";
-import Api from "../screens/Api";
-import BuscaNome from "../screens/BuscaNome";
 
-// 1. Importe o hook do seu contexto de tema
-import { useThemeContext } from "../context/ThemeContext"; // <-- VERIFIQUE SE ESTE CAMINHO ESTÁ CORRETO
+// Importa o componente das Tabs
+import BottomTabRoutes from "./tabs.routes";
+
+// Importa a tela de API para o link direto
+import Api from "../screens/Api";
+
+// Importa a tela informativa da API
+import InfoScreen from '../screens/InfoScreen';
+
+// <<< IMPORTA A NOVA TELA DE INFORMAÇÕES DO GRUPO >>>
+import GroupInfoScreen from '../screens/GroupInfoScreen'; // Verifique o caminho
+
+import { useThemeContext } from "../context/ThemeContext";
 
 const Drawer = createDrawerNavigator();
 
 export default function DrawerRoutes() {
-    // 2. Use o hook para obter o tema atual dentro do componente
     const { currentTheme } = useThemeContext();
     const isDarkMode = currentTheme === 'dark';
 
-    // 3. Defina as cores dinamicamente com base no tema
-    //    (Você pode ajustar essas cores para combinar melhor com seu design)
-    const activeColor = isDarkMode ? '#66bfff' : '#007bff'; // Ex: Azul claro no escuro, Azul padrão no claro
-    const inactiveColor = isDarkMode ? '#aaa' : '#555';    // Ex: Cinza claro no escuro, Cinza escuro no claro
-    const drawerBackgroundColor = isDarkMode ? '#1c1c1c' : '#ffffff'; // Ex: Fundo quase preto no escuro, Branco no claro
-    const headerColor = isDarkMode ? '#1c1c1c' : '#ffffff'; // Cor de fundo para o cabeçalho (opcional)
-    const headerTextColor = isDarkMode ? '#ffffff' : '#000000'; // Cor do texto/ícones do cabeçalho (opcional)
-
+    // ... (definição de cores como antes) ...
+    const activeColor = isDarkMode ? '#66bfff' : '#007bff';
+    const inactiveColor = isDarkMode ? '#aaa' : '#555';
+    const drawerBackgroundColor = isDarkMode ? '#1c1c1c' : '#ffffff';
+    const headerColor = isDarkMode ? '#1c1c1c' : '#ffffff';
+    const headerTextColor = isDarkMode ? '#ffffff' : '#000000';
 
     return (
         <Drawer.Navigator
             screenOptions={{
-                // Estilos gerais que não dependem diretamente do tema (ou que você quer manter fixos)
-                drawerLabelStyle: {
-                    fontSize: 16,
-                    marginLeft: -10,
-                },
-
-                // --- Cores dinâmicas aplicadas ---
-                drawerActiveTintColor: activeColor,    // Cor para texto/ícone do item ativo
-                drawerInactiveTintColor: inactiveColor,  // Cor para texto/ícone dos itens inativos
-                drawerStyle: {                        // Estilo do container do drawer
-                    backgroundColor: drawerBackgroundColor,
-                },
-
-                // Opcional: Ajustar cores do cabeçalho (header) para consistência
-                // headerStyle: {
-                //     backgroundColor: headerColor,
-                // },
-                // headerTintColor: headerTextColor, // Cor do título e botão de voltar no header
-
+                drawerLabelStyle: { fontSize: 16, marginLeft: -10 },
+                drawerActiveTintColor: activeColor,
+                drawerInactiveTintColor: inactiveColor,
+                drawerStyle: { backgroundColor: drawerBackgroundColor },
+                headerStyle: { backgroundColor: headerColor },
+                headerTintColor: headerTextColor,
             }}
         >
-            {/* As definições das telas permanecem as mesmas */}
-            {/* O 'color' passado para drawerIcon agora usará activeColor/inactiveColor */}
+            {/* 1. Item: Principal (Abas) */}
             <Drawer.Screen
-                name="Home"
-                component={Home}
+                name="MainTabs"
+                component={BottomTabRoutes}
                 options={{
-                    drawerLabel: 'Página Inicial',
-                    drawerIcon: ({ color, size }) => (
-                        <Feather name="home" size={size} color={color} />
-                    ),
+                    drawerLabel: 'Principal (Abas)',
+                    title: 'Consultas App',
+                    drawerIcon: ({ color, size }) => (<Feather name="grid" size={size} color={color} />),
                 }}
             />
+
+            {/* 2. Item: Busca por Processo (Direto) */}
             <Drawer.Screen
-                name="Api"
+                name="ApiDrawer"
                 component={Api}
                 options={{
-                    drawerLabel: 'Busca por número de processo',
-                    drawerIcon: ({ color, size }) => (
-                        <Feather name="search" size={size} color={color} />
-                    ),
+                    drawerLabel: 'Busca Processo (Direto)',
+                    title: 'Busca por Processo',
+                    drawerIcon: ({ color, size }) => (<Feather name="search" size={size} color={color} />),
                 }}
             />
+
+            {/* 3. Item: Sobre a API */}
             <Drawer.Screen
-                name="BuscaNome"
-                component={BuscaNome}
+                name="InfoApiDrawer"
+                component={InfoScreen}
                 options={{
-                    drawerLabel: 'Busca por nome da parte',
+                    drawerLabel: 'Sobre a API DataJud', // Ajustado Label
+                    title: 'API DataJud',
+                    drawerIcon: ({ color, size }) => (<Feather name="info" size={size} color={color} />),
+                }}
+            />
+
+            {/* 4. Item: Equipe e Projeto (NOVO) */}
+            <Drawer.Screen
+                name="GroupInfoDrawer" // Nome da rota
+                component={GroupInfoScreen} // <<< Aponta para a nova tela
+                options={{
+                    drawerLabel: 'Equipe e Projeto', // Texto no menu
+                    title: 'Sobre',               // Título no Header
                     drawerIcon: ({ color, size }) => (
-                        <Feather name="search" size={size} color={color} />
+                        <Feather name="users" size={size} color={color} /> // Ícone de usuários
                     ),
                 }}
             />
-            {/* ... adicione outras telas se necessário ... */}
+
+            {/* Adicione outras telas exclusivas do Drawer aqui */}
+
         </Drawer.Navigator>
     );
 }
