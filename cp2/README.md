@@ -40,4 +40,4 @@ Um integrante deve **anexar o link do repositório** na tarefa do portal.
 ---
 
 ### 📁 Repositório no GitHub
-[🔗 Acesse o projeto no GitHub](https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp2/Cp2_api)
+[🔗 Acesse o projeto no GitHub](https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp2)
