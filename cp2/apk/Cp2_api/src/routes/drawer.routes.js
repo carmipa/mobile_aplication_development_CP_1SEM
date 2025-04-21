@@ -6,14 +6,10 @@ import { Feather } from "@expo/vector-icons";
 // Importa o componente das Tabs
 import BottomTabRoutes from "./tabs.routes";
 
-// Importa a tela de API para o link direto
+// Importa as telas para links diretos e info
 import Api from "../screens/Api";
-
-// Importa a tela informativa da API
 import InfoScreen from '../screens/InfoScreen';
-
-// <<< IMPORTA A NOVA TELA DE INFORMAÇÕES DO GRUPO >>>
-import GroupInfoScreen from '../screens/GroupInfoScreen'; // Verifique o caminho
+import GroupInfoScreen from '../screens/GroupInfoScreen';
 
 import { useThemeContext } from "../context/ThemeContext";
 
@@ -23,7 +19,6 @@ export default function DrawerRoutes() {
     const { currentTheme } = useThemeContext();
     const isDarkMode = currentTheme === 'dark';
 
-    // ... (definição de cores como antes) ...
     const activeColor = isDarkMode ? '#66bfff' : '#007bff';
     const inactiveColor = isDarkMode ? '#aaa' : '#555';
     const drawerBackgroundColor = isDarkMode ? '#1c1c1c' : '#ffffff';
@@ -41,7 +36,7 @@ export default function DrawerRoutes() {
                 headerTintColor: headerTextColor,
             }}
         >
-            {/* 1. Item: Principal (Abas) */}
+            {/* 1. Item: Principal (Abas) --- COM LISTENER --- */}
             <Drawer.Screen
                 name="MainTabs"
                 component={BottomTabRoutes}
@@ -50,6 +45,19 @@ export default function DrawerRoutes() {
                     title: 'Consultas App',
                     drawerIcon: ({ color, size }) => (<Feather name="grid" size={size} color={color} />),
                 }}
+                // <<< ADICIONADO LISTENERS >>>
+                listeners={({ navigation, route }) => ({
+                    // Executa quando o item do drawer é pressionado
+                    drawerItemPress: (e) => {
+                        // Previne a ação padrão de navegação (que só iria para 'MainTabs')
+                        e.preventDefault();
+                        // Navega explicitamente para a rota 'MainTabs',
+                        // e dentro dela, para a tela inicial 'HomeTab'.
+                        // Isso garante que sempre volte para a Home ao clicar no Drawer.
+                        navigation.navigate('MainTabs', { screen: 'HomeTab' });
+                    },
+                })}
+                // <<< FIM DO LISTENERS >>>
             />
 
             {/* 2. Item: Busca por Processo (Direto) */}
@@ -68,26 +76,22 @@ export default function DrawerRoutes() {
                 name="InfoApiDrawer"
                 component={InfoScreen}
                 options={{
-                    drawerLabel: 'Sobre a API DataJud', // Ajustado Label
+                    drawerLabel: 'Sobre a API DataJud',
                     title: 'API DataJud',
                     drawerIcon: ({ color, size }) => (<Feather name="info" size={size} color={color} />),
                 }}
             />
 
-            {/* 4. Item: Equipe e Projeto (NOVO) */}
+            {/* 4. Item: Equipe e Projeto */}
             <Drawer.Screen
-                name="GroupInfoDrawer" // Nome da rota
-                component={GroupInfoScreen} // <<< Aponta para a nova tela
+                name="GroupInfoDrawer"
+                component={GroupInfoScreen}
                 options={{
-                    drawerLabel: 'Equipe e Projeto', // Texto no menu
-                    title: 'Sobre',               // Título no Header
-                    drawerIcon: ({ color, size }) => (
-                        <Feather name="users" size={size} color={color} /> // Ícone de usuários
-                    ),
+                    drawerLabel: 'Equipe e Projeto',
+                    title: 'Sobre',
+                    drawerIcon: ({ color, size }) => ( <Feather name="users" size={size} color={color} /> ),
                 }}
             />
-
-            {/* Adicione outras telas exclusivas do Drawer aqui */}
 
         </Drawer.Navigator>
     );

@@ -1,140 +1,153 @@
 // --- src/screens/Home.js ---
-import React from 'react';
+// VERSÃO SIMPLIFICADA E CORRETA (usando require direto)
+
+import React from 'react'; // Não precisa mais de useState/useEffect aqui
 import {
     StyleSheet,
     Text,
     View,
-    TouchableOpacity, // Usado para criar botões customizados
-    SafeAreaView // Garante que o conteúdo não fique sob notches/barras
+    TouchableOpacity,
+    SafeAreaView,
+    ImageBackground, // Mantém o ImageBackground
 } from "react-native";
-import { Feather } from '@expo/vector-icons'; // Para usar ícones
-import { useThemeContext } from "../context/ThemeContext"; // Para o tema
+import { Feather } from '@expo/vector-icons';
+import { useThemeContext } from "../context/ThemeContext";
+
+// <<< Importa diretamente usando require - Caminho confirmado como correto >>>
+const backgroundImage = require('../../assets/julgamento2.jpg');
 
 export default function Home({ navigation }) {
+
     // --- Contexto e Estilos ---
     const { currentTheme } = useThemeContext();
     const isDarkMode = currentTheme === 'dark';
-    // Gera os estilos baseados no tema (função no final do arquivo)
+    // Não precisa mais passar isLoadingAsset para os estilos
     const styles = getThemedStyles(isDarkMode);
 
-    // Função para navegar para a tela de busca
+    // --- Função de Navegação ---
     const goToApiSearch = () => {
-        navigation.navigate('ApiTab'); // Navega para a ABA de busca por número
+        navigation.navigate('ApiTab');
     };
 
     return (
-        // SafeAreaView para evitar sobreposição com barras do sistema
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
+        // <<< Usa require diretamente no source >>>
+        <ImageBackground
+            source={backgroundImage}
+            resizeMode="cover"
+            style={styles.imageBackground}
+            // onError pode ser mantido para debug, se quiser
+            onError={(error) => console.error("Erro no ImageBackground:", error.nativeEvent.error)}
+        >
+            {/* Overlay semitransparente */}
+            <View style={styles.overlay} />
 
-                {/* Seção do Título e Ícone */}
-                <View style={styles.header}>
-                    <Feather name="briefcase" size={48} color={styles.iconColor} />
-                    <Text style={styles.title}>Consultas processuais</Text>
-                    <Text style={styles.subtitle}>
-                        Acesse informações processuais de forma simplificada.
-                    </Text>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.container}>
+                    {/* Conteúdo da tela (header, content) como antes */}
+                    <View style={styles.header}>
+                        <Feather name="briefcase" size={48} color={styles.headerContentColor} />
+                        <Text style={[styles.title, { color: styles.headerContentColor }]}>Consultas CNJ</Text>
+                        <Text style={[styles.subtitle, { color: styles.headerContentColor }]}>
+                            Acesse informações processuais de forma simplificada.
+                        </Text>
+                    </View>
+
+                    <View style={styles.content}>
+                        <TouchableOpacity
+                            style={styles.ctaButton}
+                            onPress={goToApiSearch}
+                            activeOpacity={0.7}
+                        >
+                            <Feather name="search" size={24} color={styles.ctaButtonText.color} style={{ marginRight: 10 }} />
+                            <Text style={styles.ctaButtonText}>Buscar por Número do Processo</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-
-                {/* Seção Principal com o Botão de Ação */}
-                <View style={styles.content}>
-                    <TouchableOpacity
-                        style={styles.ctaButton}
-                        onPress={goToApiSearch}
-                        activeOpacity={0.7} // Efeito ao pressionar
-                    >
-                        <Feather name="search" size={24} color={styles.ctaButtonText.color} style={{ marginRight: 10 }} />
-                        <Text style={styles.ctaButtonText}>Buscar por Número do Processo</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Rodapé (Opcional - pode adicionar versão ou links) */}
-                {/*
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Versão 1.0.0</Text>
-                </View>
-                */}
-
-            </View>
-        </SafeAreaView>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
 // --- Função de Estilos Dinâmicos ---
-// Define os estilos baseados no tema (claro ou escuro)
+// (Não precisa mais do parâmetro isLoadingAsset)
 function getThemedStyles(isDark) {
-    // Define as cores base
-    const backgroundColor = isDark ? '#121212' : '#f4f7fc'; // Fundo um pouco mais suave (light)
-    const cardBackgroundColor = isDark ? '#1e1e1e' : '#ffffff'; // Cor de fundo para "cards"
-    const textColor = isDark ? '#e0e0e0' : '#444455'; // Cor de texto principal
-    const titleColor = isDark ? '#ffffff' : '#1a1a2e'; // Cor do título principal
-    const subtitleColor = isDark ? '#b0b0b0' : '#6a6a7a'; // Cor do subtítulo/descrição
-    const primaryColor = isDark ? '#66bfff' : '#007bff'; // Cor primária (azul)
-    const ctaTextColor = '#ffffff'; // Cor do texto no botão principal (branco)
-    const iconColor = primaryColor; // Cor dos ícones acompanha a cor primária
+    const backgroundColor = isDark ? '#121212' : '#f4f7fc'; // Cor de fundo fallback
+    const overlayColor = 'rgba(0, 0, 0, 0.5)';
+    const headerContentColor = '#FFFFFF';
+    const ctaButtonBackgroundColor = isDark ? '#66bfff' : '#007bff';
+    const ctaButtonTextColor = '#ffffff';
 
     return StyleSheet.create({
+        imageBackground: {
+            flex: 1,
+            backgroundColor: backgroundColor, // Mantém fallback
+        },
+        overlay: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: overlayColor,
+        },
         safeArea: {
             flex: 1,
-            backgroundColor: backgroundColor,
         },
         container: {
             flex: 1,
-            justifyContent: 'space-around', // Distribui espaço entre header, content, footer
+            justifyContent: 'space-around',
             alignItems: 'center',
             paddingHorizontal: 20,
             paddingVertical: 30,
+            backgroundColor: 'transparent',
         },
         header: {
             alignItems: 'center',
-            marginBottom: 40, // Espaço abaixo do header
+            marginBottom: 40,
         },
         title: {
             fontSize: 32,
             fontWeight: 'bold',
-            color: titleColor,
-            marginTop: 15, // Espaço acima do título
-            marginBottom: 5, // Espaço abaixo do título
+            color: headerContentColor,
+            marginTop: 15,
+            marginBottom: 5,
             textAlign: 'center',
+            textShadowColor: 'rgba(0, 0, 0, 0.5)',
+            textShadowOffset: { width: 1, height: 1 },
+            textShadowRadius: 2,
         },
         subtitle: {
             fontSize: 16,
-            color: subtitleColor,
+            color: headerContentColor,
             textAlign: 'center',
-            paddingHorizontal: 20, // Evita que o texto fique muito largo
+            paddingHorizontal: 20,
+            opacity: 0.9,
+            textShadowColor: 'rgba(0, 0, 0, 0.5)',
+            textShadowOffset: { width: 1, height: 1 },
+            textShadowRadius: 1,
         },
         content: {
-            width: '100%', // Ocupa toda a largura para o botão centralizar
-            alignItems: 'center', // Centraliza o botão
+            width: '100%',
+            alignItems: 'center',
         },
         ctaButton: {
-            flexDirection: 'row', // Alinha ícone e texto horizontalmente
-            alignItems: 'center', // Centraliza ícone e texto verticalmente
-            backgroundColor: primaryColor, // Usa a cor primária
-            paddingVertical: 18, // Mais padding vertical
-            paddingHorizontal: 35, // Mais padding horizontal
-            borderRadius: 30, // Bordas bem arredondadas
-            elevation: 3, // Sombra (Android)
-            shadowColor: '#000', // Sombra (iOS)
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.2,
-            shadowRadius: 4,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: ctaButtonBackgroundColor,
+            paddingVertical: 18,
+            paddingHorizontal: 35,
+            borderRadius: 30,
+            elevation: 5,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.3,
+            shadowRadius: 5,
         },
         ctaButtonText: {
-            color: ctaTextColor, // Texto branco no botão
+            color: ctaButtonTextColor,
             fontSize: 18,
             fontWeight: 'bold',
             textAlign: 'center',
         },
-        footer: {
-            position: 'absolute', // Posiciona no fundo
-            bottom: 20,
-        },
-        footerText: {
-            fontSize: 12,
-            color: subtitleColor, // Cor suave para o rodapé
-        },
-        // Exporta cores para uso inline se necessário (ex: ícone)
-        iconColor: iconColor,
+        // Exporta cores
+        headerContentColor: headerContentColor,
+        iconColor: headerContentColor, // Renomeado no getThemedStyles anterior, mantendo consistência
+        // Não precisa mais de loadingColor
     });
 }
