@@ -1,15 +1,16 @@
-// --- src/routes/tabs.routes.js --- (Substituindo Aba por ApiStf.js)
+// --- src/routes/tabs.routes.js ---
+// (Sem alterações nesta etapa - Mantendo 5 abas, com Busca STF substituindo a busca geral)
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
 
 // Importa as telas
 import Home from '../screens/Home';
-// import Api from '../screens/Api'; // <<< NÃO IMPORTA MAIS A GERAL
+// import Api from '../screens/Api'; // Não importa mais Api para as tabs
 import InfoScreen from '../screens/InfoScreen';
 import GroupInfoScreen from '../screens/GroupInfoScreen';
 import ComoUsar from '../screens/ComoUsar.js';
-import ApiStf from '../screens/ApiStf'; // <<< IMPORTA A TELA ApiStf.js CORRETA
+import ApiStf from '../screens/ApiStf'; // Importa a tela STF
 
 // Importa o hook de tema
 import { useThemeContext } from '../context/ThemeContext';
@@ -37,9 +38,9 @@ export default function BottomTabRoutes() {
                     let iconName;
                     size = focused ? size + 2 : size;
 
-                    // <<< LÓGICA DE ÍCONES ATUALIZADA (ApiTab agora aponta para STF) >>>
+                    // Lógica de Ícones (ApiTab agora é STF com ícone 'shield')
                     if (route.name === 'HomeTab') { iconName = 'home'; }
-                    else if (route.name === 'ApiTab') { iconName = 'shield'; } // <<< ÍCONE ATUALIZADO para STF
+                    else if (route.name === 'ApiTab') { iconName = 'shield'; } // Ícone STF
                     else if (route.name === 'ComoUsarTab') { iconName = 'help-circle'; }
                     else if (route.name === 'InfoApiTab') { iconName = 'info'; }
                     else if (route.name === 'GroupInfoTab') { iconName = 'users'; }
@@ -53,13 +54,8 @@ export default function BottomTabRoutes() {
             {/* Aba 1: Início */}
             <Tab.Screen name="HomeTab" component={Home} options={{ tabBarLabel: 'Início' }} />
 
-            {/* --- Aba 2: Busca STF (SUBSTITUÍDA) --- */}
-            <Tab.Screen
-                name="ApiTab"          // <<< Mantém o nome da ROTA original
-                component={ApiStf}    // <<< APONTA PARA ApiStf.js CORRETO >>>
-                options={{ tabBarLabel: 'Busca STF' }} // <<< MUDA O LABEL DA ABA >>>
-            />
-            {/* --- FIM DA ABA SUBSTITUÍDA --- */}
+            {/* Aba 2: Busca STF (Substituiu a busca geral) */}
+            <Tab.Screen name="ApiTab" component={ApiStf} options={{ tabBarLabel: 'Busca STF' }} />
 
             {/* Aba 3: Como Usar */}
             <Tab.Screen name="ComoUsarTab" component={ComoUsar} options={{ tabBarLabel: 'Como Usar' }} />
@@ -73,3 +69,5 @@ export default function BottomTabRoutes() {
         </Tab.Navigator>
     );
 }
+// Nenhuma alteração neste arquivo para incluir BuscaFiltro.js
+// A nova tela estará acessível apenas pelo Drawer Menu.
