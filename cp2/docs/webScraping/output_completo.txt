@@ -1,0 +1,28 @@
+[H1] Datajud-Wiki
+
+[H2] O que é o Datajud?​
+
+[H2] Datajud-Wiki​
+
+[P] Bem-vindo à Wiki do Datajud!
+
+[P] Esta é uma plataforma dedicada a fornecer informações detalhadas sobre ferramentas do Datajud comoAPI Pública do DatajudeModelo de Transferência de Dados (MTD), bem como informações relevantes aos Tribunais quanto àsOrientações de Envio ao Datajud.
+
+[P] O Datajud é a base nacional de metadados processuais do poder judiciário brasileiro. Sua finalidade é centralizar e padronizar as informações processuais de todo o país com o objetivo subsidiar o Sistema de Estatística do Poder Judiciário – SIESPJ conforme estabelecido pelaResolução CNJ n. 331/2020. A partir do Datajud é possível a geração de estatísticas e análises sobre a atividade judiciária em todo o território nacional.
+
+[P] Nesta Wiki, você encontrará uma documentação completa e orientações técnicas sobre como aproveitar ao máximo o Datajud. Explore os artigos e tutoriais no menu à esquerda para obter insights valiosos sobre o uso das ferramentas do Datajud e extrair informações relevantes.
+
+[LI] Datajud-Wiki
+
+[LI] API Pública
+
+[LI] Modelo de Transferêcia de Dados
+
+[LI] Para os Tribunais
+
+[LI] Datajud-Wiki
+
+[LI] O que é o Datajud?
+
+[LI] Datajud-Wiki
+

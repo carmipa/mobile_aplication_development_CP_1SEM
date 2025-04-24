@@ -1,16 +1,19 @@
 // --- src/routes/tabs.routes.js ---
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Feather } from '@expo/vector-icons'; // Usaremos Feather para ícones
+// <<< Importar Ionicons também para o ícone de estrela >>>
+import { Feather, Ionicons } from '@expo/vector-icons';
 
-// Importa as telas existentes das abas
+// Importa as telas para as abas
 import Home from '../screens/Home';
 import Api from '../screens/Api';
+// <<< NÃO importa mais ComoUsar aqui (será substituído) >>>
+// import ComoUsar from '../screens/ComoUsar.js';
+// <<< IMPORTA FavoritosScreen >>>
+import FavoritosScreen from '../screens/FavoritosScreen';
 import InfoScreen from '../screens/InfoScreen';
 import GroupInfoScreen from '../screens/GroupInfoScreen';
 
-// <<< IMPORTA A NOVA TELA "COMO USAR" >>>
-import ComoUsar from '../screens/ComoUsar.js'; // Verifique o caminho
 
 // Importa o hook de tema
 import { useThemeContext } from '../context/ThemeContext';
@@ -36,38 +39,40 @@ export default function BottomTabRoutes() {
                 tabBarStyle: {
                     backgroundColor: tabBarBackgroundColor,
                     borderTopColor: borderTopColor,
-                    // height: 60, // Pode ajustar altura se necessário com 5 abas
-                    // paddingTop: 5,
+                    // height: 60, // Ajuste se necessário
                 },
                 tabBarLabelStyle: {
-                    fontSize: 10, // Fonte pequena para caber 5 labels
-                    marginBottom: 3, // Pouco espaço abaixo do label
+                    fontSize: 10, // Mantém fonte pequena
+                    marginBottom: 3,
                 },
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName;
-                    // Deixa o ícone focado um pouco maior
-                    size = focused ? size + 2 : size;
+                    // Usa Feather por padrão, mas muda para Ionicons para a estrela
+                    let IconComponent = Feather;
+                    size = focused ? size + 1 : size; // Pequeno ajuste de tamanho para ícone focado
 
-                    // <<< LÓGICA DE ÍCONES ATUALIZADA PARA 5 ABAS >>>
+                    // <<< LÓGICA DE ÍCONES ATUALIZADA >>>
                     if (route.name === 'HomeTab') {
                         iconName = 'home';
                     } else if (route.name === 'ApiTab') {
                         iconName = 'search';
-                    } else if (route.name === 'ComoUsarTab') { // <<< Ícone para Como Usar
-                        iconName = 'help-circle';
+                        // <<< Aba de Favoritos >>>
+                    } else if (route.name === 'FavoritosTab') {
+                        IconComponent = Ionicons; // Muda para Ionicons
+                        iconName = focused ? 'star' : 'star-outline'; // Estrela preenchida se focada
                     } else if (route.name === 'InfoApiTab') {
-                        iconName = 'info'; // Mudei para 'info' para diferenciar da ajuda
+                        iconName = 'info';
                     } else if (route.name === 'GroupInfoTab') {
                         iconName = 'users';
                     } else {
-                        iconName = 'circle'; // Padrão
+                        iconName = 'circle'; // Ícone padrão
                     }
-                    return <Feather name={iconName} size={size} color={color} />;
+                    // Renderiza o componente de ícone correto
+                    return <IconComponent name={iconName} size={size} color={color} />;
                 },
-                headerShown: false,
+                headerShown: false, // Mantém sem cabeçalho aqui, pois está no Drawer
             })}
-            // Ordem das abas
-            initialRouteName="HomeTab" // Garante que começa na Home
+            initialRouteName="HomeTab" // Começa na Home
         >
             {/* Aba 1: Início */}
             <Tab.Screen
@@ -83,12 +88,12 @@ export default function BottomTabRoutes() {
                 options={{ tabBarLabel: 'Nº Processo' }}
             />
 
-            {/* Aba 3: Como Usar (NOVA) */}
+            {/* <<< Aba 3: AGORA É FAVORITOS >>> */}
             <Tab.Screen
-                name="ComoUsarTab" // Nome único para a rota da tab
-                component={ComoUsar} // Aponta para a tela ComoUsar
+                name="FavoritosTab" // Novo nome para a rota da aba
+                component={FavoritosScreen} // Novo componente para a aba
                 options={{
-                    tabBarLabel: 'Como Usar', // Label da aba
+                    tabBarLabel: 'Favoritos', // Novo rótulo da aba
                 }}
             />
 
