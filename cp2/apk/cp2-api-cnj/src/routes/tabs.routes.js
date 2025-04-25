@@ -1,19 +1,15 @@
 // --- src/routes/tabs.routes.js ---
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// <<< Importar Ionicons também para o ícone de estrela >>>
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons'; // Ionicons já estava importado
 
 // Importa as telas para as abas
 import Home from '../screens/Home';
 import Api from '../screens/Api';
-// <<< NÃO importa mais ComoUsar aqui (será substituído) >>>
-// import ComoUsar from '../screens/ComoUsar.js';
-// <<< IMPORTA FavoritosScreen >>>
+import ComoUsar from '../screens/ComoUsar'; // <<< IMPORTAR ComoUsar >>>
 import FavoritosScreen from '../screens/FavoritosScreen';
 import InfoScreen from '../screens/InfoScreen';
 import GroupInfoScreen from '../screens/GroupInfoScreen';
-
 
 // Importa o hook de tema
 import { useThemeContext } from '../context/ThemeContext';
@@ -47,19 +43,19 @@ export default function BottomTabRoutes() {
                 },
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName;
-                    // Usa Feather por padrão, mas muda para Ionicons para a estrela
-                    let IconComponent = Feather;
-                    size = focused ? size + 1 : size; // Pequeno ajuste de tamanho para ícone focado
+                    let IconComponent = Feather; // Usa Feather por padrão
+                    size = focused ? size + 1 : size;
 
                     // <<< LÓGICA DE ÍCONES ATUALIZADA >>>
                     if (route.name === 'HomeTab') {
                         iconName = 'home';
                     } else if (route.name === 'ApiTab') {
                         iconName = 'search';
-                        // <<< Aba de Favoritos >>>
                     } else if (route.name === 'FavoritosTab') {
-                        IconComponent = Ionicons; // Muda para Ionicons
-                        iconName = focused ? 'star' : 'star-outline'; // Estrela preenchida se focada
+                        IconComponent = Ionicons; // Muda para Ionicons para Favoritos
+                        iconName = focused ? 'star' : 'star-outline';
+                    } else if (route.name === 'ComoUsarTab') { // <<< ADICIONADO: Condição para Como Usar >>>
+                        iconName = 'help-circle'; // Ícone de ajuda (Feather)
                     } else if (route.name === 'InfoApiTab') {
                         iconName = 'info';
                     } else if (route.name === 'GroupInfoTab') {
@@ -70,7 +66,7 @@ export default function BottomTabRoutes() {
                     // Renderiza o componente de ícone correto
                     return <IconComponent name={iconName} size={size} color={color} />;
                 },
-                headerShown: false, // Mantém sem cabeçalho aqui, pois está no Drawer
+                headerShown: false, // Mantém sem cabeçalho aqui
             })}
             initialRouteName="HomeTab" // Começa na Home
         >
@@ -88,31 +84,34 @@ export default function BottomTabRoutes() {
                 options={{ tabBarLabel: 'Nº Processo' }}
             />
 
-            {/* <<< Aba 3: AGORA É FAVORITOS >>> */}
+            {/* Aba 3: Favoritos */}
             <Tab.Screen
-                name="FavoritosTab" // Novo nome para a rota da aba
-                component={FavoritosScreen} // Novo componente para a aba
+                name="FavoritosTab"
+                component={FavoritosScreen}
+                options={{ tabBarLabel: 'Favoritos' }}
+            />
+
+            {/* <<< Aba 4: COMO USAR (ADICIONADA) >>> */}
+            <Tab.Screen
+                name="ComoUsarTab"         // Nome da rota para a aba
+                component={ComoUsar}       // Componente da tela importado
                 options={{
-                    tabBarLabel: 'Favoritos', // Novo rótulo da aba
+                    tabBarLabel: 'Como Usar', // Rótulo da aba
                 }}
             />
 
-            {/* Aba 4: Informações da API */}
+            {/* Aba 5: Informações da API (era 4) */}
             <Tab.Screen
                 name="InfoApiTab"
                 component={InfoScreen}
-                options={{
-                    tabBarLabel: 'Info API',
-                }}
+                options={{ tabBarLabel: 'Info API' }}
             />
 
-            {/* Aba 5: Sobre a Equipe */}
+            {/* Aba 6: Sobre a Equipe (era 5) */}
             <Tab.Screen
                 name="GroupInfoTab"
                 component={GroupInfoScreen}
-                options={{
-                    tabBarLabel: 'Sobre',
-                }}
+                options={{ tabBarLabel: 'Sobre' }}
             />
 
         </Tab.Navigator>
