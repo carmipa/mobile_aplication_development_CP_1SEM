@@ -2,19 +2,10 @@ repositório central:
 https://github.com/carmipa/mobile_aplication_development_CP_1SEM
 
 link do repositório do cp2:
-https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp2
+https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp2/cp2-api
 
 endereço figma: https:
 https://www.figma.com/slides/Hhy79JgSaOUPIMNpgCj81y/Consulta-processual-Simplific?node-id=1-44&t=kHALV2gDBPDlPQ7J-1
-
-
-!!! ATENÇÃO !!!
-
-a versão da apresentação se encontra na seguinte pasta:
-https://github.com/carmipa/mobile_aplication_development_CP_1SEM/tree/main/cp2/apk
-
-porque isso, porque a outra pasta encontrasse alterações pedidas por clientes!
-
 
 
 -------------------------------
